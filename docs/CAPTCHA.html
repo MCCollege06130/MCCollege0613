@@ -1,248 +1,892 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>验证码 - Minecraft MC Collge 我的世界MC学院 - 人机验证</title>
+  <title>Minecraft MC学院 - 人机验证</title>
   <style>
-    body {
-      -moz-user-select: none;
-      -webkit-user-select: none;
-      -ms-user-select: none;
+    /* 自定义字体 */
+    @font-face {
+      font-family: McFont;
+      src: url("./mc-font.ttf") format("truetype");
+      font-weight: normal;
+      font-style: normal;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: McFont, system-ui, -apple-system, "Microsoft YaHei", sans-serif;
       user-select: none;
+      -webkit-user-select: none;
     }
-    .container {
+    input {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    /* 全局主题变量统一管控 */
+    :root {
+      --body-bg: #e6f0f7;
+      --card-bg: #ffffff;
+      --inner-wrap-bg: #f0f7fc;
+      --border-color: #b8d0e0;
+      --text-main: #22445c;
+      --text-sub: #556677;
+      --text-muted: #8899aa;
+      --input-bg: #fff;
+      --input-border: #c2d6e6;
+      --btn-bg: linear-gradient(135deg, #48a2e0, #348acc);
+      --btn-hover: linear-gradient(135deg, #3892d0, #2a7cbc);
+      --btn-active: linear-gradient(135deg, #2c80bc, #206aa8);
+      --shadow-soft: 0 8px 26px rgba(30, 80, 120, 0.12);
+      --hover-stroke-width: 2px;
+      --complement: #f2a900;
+      --complement-half: rgba(242, 169, 0, 0.5);
+    }
+    /* 纯白主题 */
+    body.theme-white {
+      --body-bg: #f5f7fa;
+      --card-bg: #ffffff;
+      --inner-wrap-bg: #f8fafc;
+      --border-color: #dde2e8;
+      --text-main: #1a202c;
+      --text-sub: #4a5568;
+      --text-muted: #718096;
+      --input-bg: #fff;
+      --input-border: #cbd5e0;
+      --btn-bg: linear-gradient(135deg, #7886a8, #606e8c);
+      --btn-hover: linear-gradient(135deg, #647292, #4e5b77);
+      --btn-active: linear-gradient(135deg, #505e7a, #3e4a62);
+      --shadow-soft: 0 8px 24px rgba(0,0,0,0.06);
+      --complement: #1a202c;
+      --complement-half: rgba(26, 32, 44, 0.5);
+    }
+    /* 深色黑主题 */
+    body.theme-dark {
+      --body-bg: #1a202c;
+      --card-bg: #2d3748;
+      --inner-wrap-bg: #3c4a5f;
+      --border-color: #4a5568;
+      --text-main: #e2e8f0;
+      --text-sub: #a0aec0;
+      --text-muted: #718096;
+      --input-bg: #4a5568;
+      --input-border: #718096;
+      --btn-bg: linear-gradient(135deg, #8292b0, #6a7a96);
+      --btn-hover: linear-gradient(135deg, #8898b0, #70809a);
+      --btn-active: linear-gradient(135deg, #687892, #5a6a82);
+      --shadow-soft: 0 8px 24px rgba(0,0,0,0.3);
+      --complement: #ffffff;
+      --complement-half: rgba(255, 255, 255, 0.5);
+    }
+    /* 粉色主题 */
+    body.theme-pink {
+      --body-bg: #fce8ef;
+      --card-bg: #fff5f8;
+      --inner-wrap-bg: #ffe6ee;
+      --border-color: #f0b8cc;
+      --text-main: #582338;
+      --text-sub: #914c68;
+      --text-muted: #b87b94;
+      --input-bg: #fff;
+      --input-border: #f0b8cc;
+      --btn-bg: linear-gradient(135deg, #e08ab4, #c86e94);
+      --btn-hover: linear-gradient(135deg, #d4789c, #b85e84);
+      --btn-active: linear-gradient(135deg, #c0688a, #a85078);
+      --shadow-soft: 0 8px 24px rgba(180, 80, 120, 0.1);
+      --complement: #2dd4bf;
+      --complement-half: rgba(45, 212, 191, 0.5);
+    }
+
+    body {
+      background: var(--body-bg);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      transition: background 0.3s ease;
+    }
+    .page-wrap {
+      width: 100%;
+      min-height: 100vh;
+    }
+    .main-card {
+      min-width: 320px;
+      max-width: 520px;
+      width: 100%;
+      margin: 0 auto 3rem;
+      background: var(--card-bg);
+      padding: 2rem 1.5rem;
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-color);
       text-align: center;
-      margin-top: 30px;
+      transition: background 0.3s, border-color 0.3s;
     }
+    .card-header {
+      margin-bottom: 1.4rem;
+    }
+    .card-header h1 {
+      font-size: 1.6rem;
+      color: var(--text-main);
+      letter-spacing: 1px;
+      transition: color 0.3s;
+    }
+    .card-header .sub-title {
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      margin-top: 4px;
+      transition: color 0.3s;
+    }
+    .verify-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    /* 验证码整体外框 大圆角50px */
+    .code-input-wrap {
+      border: 1px solid var(--border-color);
+      border-radius: 50px;
+      background: var(--inner-wrap-bg);
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .code-input-wrap.click-nohover {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement-half);
+    }
+    @media (max-width: 419px) {
+      .code-input-wrap { flex-direction: column; }
+      .form-box .refresh-circle { display: none; }
+      .canvas-box .refresh-circle { display: flex; }
+    }
+    @media (min-width: 420px) {
+      .code-input-wrap { flex-direction: row; align-items: flex-start; }
+      .canvas-box .refresh-circle { display: none; }
+      .form-box .refresh-circle { display: flex; }
+    }
+    .canvas-box {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    /* 验证码画布 悬浮仅自身外发光 */
     #canvas {
-      margin-bottom: 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #ffffff;
+      transition: box-shadow 0.2s ease;
+    }
+    #canvas.hover-active {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement);
+    }
+    #canvas.click-nohover {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement-half);
+    }
+    /* 刷新按钮 强制正圆不变形 */
+    .refresh-circle {
+      width: 34px;
+      height: 34px;
+      aspect-ratio: 1 / 1;
+      flex: none;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: var(--text-sub);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: none;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s ease;
+    }
+    .refresh-circle.hover-active {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement);
+    }
+    .refresh-circle.click-nohover {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement-half);
+    }
+    .refresh-icon {
+      font-size: 16px;
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+    .refresh-circle:hover:not(.click-anim) .refresh-icon {
+      transform: rotate(15deg);
+    }
+    .refresh-circle:hover:not(.click-anim) {
+      background: var(--border-color);
+    }
+    /* 刷新图标点击动画0.3s */
+    @keyframes iconClickAnim {
+      0% { transform: rotate(15deg) scale(1); opacity: 1; }
+      40% { transform: rotate(180deg) scale(0); opacity: 0; }
+      60% { transform: rotate(180deg) scale(0); opacity: 0; }
+      100% { transform: rotate(0deg) scale(1); opacity: 1; }
+    }
+    .refresh-circle.click-anim { pointer-events: none; }
+    .refresh-circle.click-anim .refresh-icon {
+      animation: iconClickAnim 0.3s ease-out forwards;
+    }
+    .form-box {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      max-width: 180px;
     }
     #text {
-      width: 160px;
-      padding: 4px;
-      box-sizing: border-box;
-      font-size: 14px;
-      height: 26px;
+      width: 100%;
+      padding: 0.5rem 0.8rem;
+      font-size: 1rem;
+      height: 42px;
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.2s;
+      text-align: center;
+      background: var(--input-bg);
+      color: var(--text-main);
     }
-    /* 固定高度占位容器，杜绝布局跳动 */
+    #text.hover-active {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement);
+    }
+    #text.click-nohover {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement-half);
+    }
+    #text:focus {
+      border-color: var(--btn-bg);
+      box-shadow: 0 0 0 2px rgba(72, 156, 210, 0.15);
+    }
+    /* 提示/时间/提交统一外置区块，间距7px */
+    .out-info-block {
+      margin-top: 7px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
     .fixed-area {
       min-height: 76px;
-      margin-top: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: 100%;
     }
-    /* 提示文字容器 */
     .tip-wrap {
       display: inline-block;
       position: relative;
+      padding: 0 4px;
+      text-align: center;
     }
     .tip-text {
-      font-size:14px;
+      font-size: 15px;
+      font-weight: 500;
+      text-align: center;
+      transition: color 0.3s;
     }
-    /* 自适应文字宽度横线，距离文字底部7px，高度5px */
     .tip-wrap::after {
-      content:"";
-      position:absolute;
-      left:0;
-      bottom:-7px;
-      width:100%;
-      height:5px;
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -7px;
+      width: 100%;
+      height: 5px;
+      border-radius: 3px;
+      transition: background 0.2s;
     }
-    .success .tip-text {color:#009944;}
-    .success::after {background-color:#009944;}
-
-    .error .tip-text {color:#dd2222;}
-    .error::after {background-color:#dd2222;}
-
-    .refresh .tip-text {color:#f28500;}
-    .refresh::after {background-color:#f28500;}
-
-    /* 【已修改】横线 ↔ 时间距离改为7px */
+    .success .tip-text { color:#009944; }
+    .success::after { background-color:#009944; }
+    .error .tip-text { color:#dd2222; }
+    .error::after { background-color:#dd2222; }
+    .refresh .tip-text { color:#f28500; }
+    .refresh::after { background-color:#f28500; }
+    .empty-tip .tip-text { color: transparent; }
+    .empty-tip::after { background-color: transparent; }
     .time-text {
-      margin-top: 15px;
       font-size: 13px;
-      color: #444;
+      color: var(--text-sub);
+      text-align: center;
+      width: 100%;
+      transition: color 0.3s;
     }
-    /* 提交按钮：和输入框同宽，高度1.5倍 */
+    /* 渐变提交按钮，统一外发光，删除旧绿色hover阴影 */
     #bt {
-      width: 160px;
-      height: calc(1.5 * 26px);
-      margin-top: 7px;
+      width: 180px;
+      height: 46px;
       cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background: var(--btn-bg);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+    #bt.hover-active {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement);
+    }
+    #bt.click-nohover {
+      box-shadow: 0 0 0 var(--hover-stroke-width) var(--complement-half);
+    }
+    #bt:hover {
+      background: var(--btn-hover);
+      transform: translateY(-2px);
+    }
+    #bt:active {
+      transform: translateY(0);
+      background: var(--btn-active);
+    }
+    .refresh-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    /* 主题切换圆点美化 */
+    .theme-switch-wrap {
+      margin-top: 1.2rem;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .theme-dot {
+      width: 26px;
+      height: 26px;
+      aspect-ratio: 1/1;
+      flex: none;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .theme-dot:hover { transform: scale(1.1); }
+    .theme-dot.active {
+      box-shadow: 0 0 0 2px var(--btn-bg);
+    }
+    .dot-default { background: #e6f0f7; }
+    .dot-white { background: #f5f7fa; }
+    .dot-dark { background: #2d3748; }
+    .dot-pink { background: #fce8ef; }
+    .community-desc {
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      padding: 1.8rem 1.2rem;
+      border-radius: 22px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid var(--border-color);
+      text-align: center;
+      line-height: 1.7;
+      color: var(--text-main);
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .community-desc h1 {
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+      transition: color 0.3s;
+    }
+    .community-desc p {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      transition: color 0.3s;
+    }
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 1rem;
+    }
+    .dialog-overlay.show { display: flex; }
+    .dialog-box {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 300px;
+      padding: 2rem 1.5rem;
+      border-radius: 24px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+      text-align: center;
+      animation: popIn 0.3s cubic-bezier(0.34, 1.4, 0.64, 1);
+      transition: background 0.3s;
+    }
+    .dialog-box .icon {
+      font-size: 2.8rem;
+      color: #009944;
+      margin-bottom: 0.8rem;
+    }
+    .dialog-box h3 {
+      font-size: 1.4rem;
+      color: var(--text-main);
+      margin-bottom: 0.6rem;
+      transition: color 0.3s;
+    }
+    .dialog-box p {
+      color: var(--text-sub);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      transition: color 0.3s;
+    }
+    .dialog-btn {
+      padding: 0.6rem 2rem;
+      border-radius: 30px;
+      border: none;
+      background: var(--btn-bg);
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .dialog-btn:hover { background: var(--btn-hover); }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @media(max-width: 360px) {
+      .main-card, .community-desc { padding: 1.4rem 1rem; }
+      .card-header h1 { font-size: 1.4rem; }
     }
   </style>
-  <script type="text/javascript">
-    // 禁用右键菜单
-    window.addEventListener('contextmenu', function (e) {
-      e.preventDefault();
-      alert('该功能已被禁用');
-    });
-    // 防止选择文本
-    document.addEventListener('selectstart', function (e) {
-      e.preventDefault();
-    });
-    // 禁止开发者工具快捷键
-    document.addEventListener('keydown', function (e) {
-      if (e.ctrlKey && e.shiftKey && ['I', 'C', 'J'].includes(e.key)) {
-        e.preventDefault();
-        alert('该功能已被禁用');
-      }
-      if (e.ctrlKey && e.key.toLowerCase() === 'u') {
-        e.preventDefault();
-        alert('该功能已被禁用');
-      }
-    });
-  </script>
 </head>
-
 <body>
-  <div class="container">
-    <h1>人机验证</h1>
-    <canvas id="canvas" width="120" height="40"></canvas>
-    <br>
-    <input type="text" id="text" placeholder="请输入验证码">
-
-    <!-- 固定高度预留区域 -->
-    <div class="fixed-area">
-      <div class="tip-wrap" id="tipWrap">
-        <div class="tip-text" id="tipBox"></div>
-      </div>
-      <div class="time-text" id="timeBox"></div>
+<div class="page-wrap">
+  <div class="main-card">
+    <div class="card-header">
+      <h1>人机验证</h1>
+      <div class="sub-title">Minecraft MC College 冒险家验证</div>
     </div>
-
-    <input type="button" value="提交" id="bt">
+    <div class="verify-wrap">
+      <div class="code-input-wrap" id="codeWrap">
+        <div class="canvas-box">
+          <canvas id="canvas" width="120" height="40"></canvas>
+          <div class="refresh-circle" id="circleRefreshCanvas">
+            <span class="refresh-icon">⟳</span>
+          </div>
+        </div>
+        <div class="form-box">
+          <input type="text" placeholder="请输入验证码" id="text">
+          <div class="refresh-circle" id="circleRefreshInput">
+            <span class="refresh-icon">⟳</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="out-info-block">
+      <div class="fixed-area">
+        <div class="tip-wrap" id="tipWrap">
+          <div class="tip-text" id="tipBox"></div>
+        </div>
+        <div class="time-text" id="timeBox"></div>
+      </div>
+      <input type="button" id="bt" value="提交">
+      <div class="refresh-hint">点击验证码即可刷新</div>
+    </div>
+    <div class="theme-switch-wrap">
+      <span class="theme-dot dot-default active" data-theme="" title="默认主题"></span>
+      <span class="theme-dot dot-white" data-theme="theme-white" title="纯白主题"></span>
+      <span class="theme-dot dot-dark" data-theme="theme-dark" title="深色黑色主题"></span>
+      <span class="theme-dot dot-pink" data-theme="theme-pink" title="粉色主题"></span>
+    </div>
   </div>
 
+  <div class="community-desc">
+    <h1>Minecraft MC Collge<br>我的世界MC学院</h1>
+    <p>欢迎各位冒险家加入 Minecraft(我的世界) <br>
+    玩家交流社区 共同 交流、学习 我的世界！<br>
+    <br>
+    （Chinese）（zh-cn｜总社区｜中文）<br>
+    （Headquarters Community）<br>
+    <br>
+    Minecraft(我的世界) 玩家交流群<br>
+    Player Communication Group<br>
+    (QQ)总群 群号：295266433<br>
+    Headquarters Group ID<br>
+    <br>
+    Minecraft(我的世界) 玩家交流频道<br>
+    Player Communication Channel<br>
+    KOOK 总频道 Headquarters Channel<br>
+    KOOK：https://kook.vip/OHiU4v
+  </div>
 
-
-
-
-
-
-
-
-<br>
-<br>
-<br>
-<div style="text-align: center;">
-<h1>Minecraft MC Collge<br>我的世界MC学院</h1>
-<br>
-<p>欢迎各位冒险家加入 Minecraft(我的世界) <br>
-玩家交流社区 共同 交流、学习 我的世界！<br>
-<br>
-（Chinese）（zh-cn｜总社区｜中文）<br>
-（Headquarters Community）<br>
-<br>
-Minecraft(我的世界) 玩家交流群<br>
-Player Communication Group<br>
-(QQ)总群 群号：295266433<br>
-Headquarters Group ID<br>
-<br>
-Minecraft(我的世界) 玩家交流频道<br>
-Player Communication Channel<br>
-KOOK 总频道 Headquarters Channel<br>
-KOOK：https://kook.vip/OHiU4v
-</p>
+  <div class="dialog-overlay" id="successDialog">
+    <div class="dialog-box">
+      <div class="icon">✓</div>
+      <h3>验证成功</h3>
+      <p>你已通过人机验证，欢迎来到MC学院社区！</p>
+      <button class="dialog-btn" id="closeDialogBtn">确定</button>
+    </div>
+  </div>
 </div>
-  <script>
-    var canvas = document.getElementById("canvas");
-    var context = canvas.getContext("2d");
-    var button = document.getElementById("bt");
-    var input = document.getElementById("text");
-    var tipBox = document.getElementById("tipBox");
-    var tipWrap = document.getElementById("tipWrap");
-    var timeBox = document.getElementById("timeBox");
-    var codeStr = "";
 
-    draw();
+<script>
+var canvas = document.getElementById("canvas");
+var context = canvas.getContext("2d");
+var button = document.getElementById("bt");
+var input = document.getElementById("text");
+var tipBox = document.getElementById("tipBox");
+var tipWrap = document.getElementById("tipWrap");
+var timeBox = document.getElementById("timeBox");
+var codeStr = "";
+var circleRefreshCanvas = document.getElementById("circleRefreshCanvas");
+var circleRefreshInput = document.getElementById("circleRefreshInput");
+const refreshBtns = [circleRefreshCanvas, circleRefreshInput];
+const codeWrap = document.getElementById("codeWrap");
+let hoverTarget = null;
 
-    // 点击画布刷新验证码 → 提示【刷新成功】橘黄色
-    canvas.onclick = function () {
-      context.clearRect(0, 0, 120, 40);
-      draw();
-      tipBox.textContent = "刷新成功";
-      tipWrap.className = "tip-wrap refresh";
-    }
+// 主题切换
+const themeDots = document.querySelectorAll('.theme-dot');
+const body = document.body;
+themeDots.forEach(dot=>{
+  dot.addEventListener('click',()=>{
+    const t = dot.dataset.theme;
+    body.className = t;
+    themeDots.forEach(d=>d.classList.remove('active'));
+    dot.classList.add('active');
+  })
+})
 
-    // 随机颜色函数
-    function getColor() {
-      var r = Math.floor(Math.random() * 256);
-      var g = Math.floor(Math.random() * 256);
-      var b = Math.floor(Math.random() * 256);
-      return "rgb(" + r + "," + g + "," + b + ")";
-    }
+// 弹窗控制
+const dialogOverlay = document.getElementById('successDialog');
+const closeDialogBtn = document.getElementById('closeDialogBtn');
+function closeDialog() { dialogOverlay.classList.remove('show'); }
+closeDialogBtn.addEventListener('click', closeDialog);
+dialogOverlay.addEventListener('click', e=>{ if(e.target === dialogOverlay) closeDialog(); })
 
-    function draw() {
-      context.clearRect(0, 0, 120, 40);
-      context.strokeRect(0, 0, 120, 40);
-      const aCode = ["D", "n", "H", "T", "G", "5", "4", "R", "Y", "f", "a", "2", "m", "W", "u", "U", "e", "E", "r", "N", "q", "b", "Q", "g", "F", "3", "8", "M", "t", "A", "h", "y", "d"];
-      var arr = [];
-      for (var i = 0; i < 4; i++) {
-        var x = 20 + i * 20;
-        var y = 20 + 10 * Math.random();
-        var index = Math.floor(Math.random() * aCode.length);
-        var txt = aCode[index];
-        context.font = "bold 20px 微软雅黑";
-        context.fillStyle = getColor();
-        context.translate(x, y);
-        var deg = 70 * Math.random() * Math.PI / 180;
-        context.rotate(deg);
-        context.fillText(txt, 0, 0);
-        context.rotate(-deg);
-        context.translate(-x, -y);
-        arr[i] = txt;
-      }
-      codeStr = arr.join("");
+// 统一刷新验证码
+function refreshCode(){
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  draw();
+  tipBox.textContent = "刷新成功";
+  tipWrap.className = "tip-wrap refresh";
+  timeBox.textContent = formatNowTime();
+}
 
-      // 干扰线
-      for (var i = 0; i < 8; i++) {
+// 刷新按钮点击动画
+function handleRefreshClick(btn) {
+  btn.classList.add('click-anim');
+  refreshCode();
+  setTimeout(()=>{ btn.classList.remove('click-anim'); }, 300);
+}
+refreshBtns.forEach(btn=> btn.addEventListener('click', ()=>handleRefreshClick(btn)));
+
+// 输入框回车提交
+input.addEventListener('keydown', e=>{ if(e.key === 'Enter') button.click(); })
+// 输入框聚焦清空提示
+input.addEventListener('focus', ()=>{
+  tipBox.textContent = "";
+  tipWrap.className = "tip-wrap empty-tip";
+})
+canvas.onclick = refreshCode;
+
+// 随机色彩
+function getColor() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  return `rgb(${r},${g},${b})`;
+}
+
+// 随机透明度
+function getRandomLayer() {
+  return 0.2 + Math.random() * 0.8;
+}
+
+// =========【修复后的绘制函数】=========
+function draw() {
+  const w = canvas.width;
+  const h = canvas.height;
+  context.clearRect(0, 0, w, h);
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.globalAlpha = 1;
+
+  // =========修改点：固定纯白色画布背景============
+  const bgColor = "#ffffff";
+  context.fillStyle = bgColor;
+  context.fillRect(0, 0, w, h);
+
+  // 圆角边框
+  const radius = 12;
+  context.beginPath();
+  context.moveTo(radius, 0);
+  context.lineTo(w - radius, 0);
+  context.quadraticCurveTo(w, 0, w, radius);
+  context.lineTo(w, h - radius);
+  context.quadraticCurveTo(w, h, w - radius, h);
+  context.lineTo(radius, h);
+  context.quadraticCurveTo(0, h, 0, h - radius);
+  context.lineTo(0, radius);
+  context.quadraticCurveTo(0, 0, radius, 0);
+  context.closePath();
+  context.strokeStyle = getColor();
+  context.lineWidth = 1 + Math.random() * 3;
+  context.stroke();
+
+  // =========修改点：更新字符数组，移除0 O o l I=========
+  const aCode = [
+    "A","B","C","D","E","F","G","H","J","K","L","M","N","P","Q","R","S","T","U","V","W","X","Y","Z",
+    "a","b","c","d","e","f","g","h","i","j","k","m","n","p","q","r","s","t","u","v","w","x","y","z",
+    "1","2","3","4","5","6","7","8","9"
+  ];
+
+  // 生成验证码文本
+  codeStr = "";
+  const textLayersRaw = [];
+  for (let i = 0; i < 4; i++) {
+    const txt = aCode[Math.floor(Math.random() * aCode.length)];
+    codeStr += txt;
+    textLayersRaw.push({
+      type: "text",
+      text: txt,
+      x: 18 + i * 20 + (Math.random() - 0.5) * 6,
+      y: 24 + (Math.random() - 0.5) * 8,
+      size: 16 + Math.random() * 8,
+      color: getColor(),
+      alpha: 0.75 + Math.random() * 0.25,
+      rotate: (Math.random() - 0.5) * 0.6,
+      bold: Math.random() > 0.5
+    });
+  }
+
+  // =====干扰层（底层先绘制）=====
+  const interLayers = [];
+
+  // 干扰线图层（直线/贝塞尔曲线随机）
+  const lineCount = 5 + Math.floor(Math.random() * 6);
+  for (let i = 0; i < lineCount; i++) {
+    const type = Math.random() > 0.5 ? "line" : "wave";
+    interLayers.push({
+      type: type,
+      color: getColor(),
+      alpha: getRandomLayer(),
+      lineWidth: 1 + Math.random() * 2
+    });
+  }
+
+  // 随机点缀图层：圆点、短线、十字、方块
+  const dotCount = 12 + Math.floor(Math.random() * 18);
+  for (let i = 0; i < dotCount; i++) {
+    const types = ["dot", "dash", "cross", "square"];
+    interLayers.push({
+      type: types[Math.floor(Math.random() * types.length)],
+      x: Math.random() * w,
+      y: Math.random() * h,
+      color: getColor(),
+      alpha: getRandomLayer()
+    });
+  }
+
+  // 洗牌干扰图层
+  for (let i = interLayers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [interLayers[i], interLayers[j]] = [interLayers[j], interLayers[i]];
+  }
+
+  // 第一步：绘制所有干扰元素（底层）
+  interLayers.forEach(layer => {
+    context.save();
+    switch (layer.type) {
+      case "line":
+        context.globalAlpha = layer.alpha;
         context.beginPath();
-        context.moveTo(Math.random() * 120, Math.random() * 40);
-        context.lineTo(Math.random() * 120, Math.random() * 40);
-        context.strokeStyle = getColor();
+        context.strokeStyle = layer.color;
+        context.lineWidth = layer.lineWidth;
+        context.moveTo(Math.random() * w, Math.random() * h);
+        context.lineTo(Math.random() * w, Math.random() * h);
         context.stroke();
-      }
-      // 干扰点
-      for (var i = 0; i < 20; i++) {
+        break;
+
+      case "wave":
+        context.globalAlpha = layer.alpha;
         context.beginPath();
-        var x = Math.random() * 120;
-        var y = Math.random() * 40;
-        context.moveTo(x, y);
-        context.lineTo(x + 1, y + 1);
-        context.strokeStyle = getColor();
+        context.strokeStyle = layer.color;
+        context.lineWidth = layer.lineWidth;
+        context.moveTo(0, Math.random() * h);
+        context.bezierCurveTo(
+          w * 0.3, Math.random() * h,
+          w * 0.7, Math.random() * h,
+          w, Math.random() * h
+        );
         context.stroke();
-      }
-    }
+        break;
 
-    // 格式化时间 YYYY年MM月DD日 hh:mm:ss:ms
-    function formatNowTime() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const h = String(now.getHours()).padStart(2, '0');
-      const m = String(now.getMinutes()).padStart(2, '0');
-      const s = String(now.getSeconds()).padStart(2, '0');
-      const ms = String(now.getMilliseconds()).padStart(3, '0');
-      return `${year}年${month}月${day}日 ${h}:${m}:${s}:${ms}`;
-    }
+      case "dot":
+        context.globalAlpha = layer.alpha;
+        context.beginPath();
+        context.fillStyle = layer.color;
+        context.arc(layer.x, layer.y, 1 + Math.random() * 2, 0, Math.PI * 2);
+        context.fill();
+        break;
 
-    button.onclick = function () {
-      var text = input.value.trim();
-      const currentTime = formatNowTime();
-      timeBox.textContent = currentTime;
+      case "dash":
+        context.globalAlpha = layer.alpha;
+        context.beginPath();
+        context.strokeStyle = layer.color;
+        context.lineWidth = 1;
+        context.moveTo(layer.x, layer.y);
+        context.lineTo(layer.x + 3 + Math.random() * 4, layer.y);
+        context.stroke();
+        break;
 
-      if (text === codeStr) {
-        tipBox.textContent = "验证成功";
-        tipWrap.className = "tip-wrap success";
-      } else {
-        tipBox.textContent = "验证失败";
-        tipWrap.className = "tip-wrap error";
-      }
-      // 无论成功失败：清空输入框 + 刷新验证码（提示文字保留）
-      input.value = "";
-      draw();
+      case "cross":
+        context.globalAlpha = layer.alpha;
+        context.beginPath();
+        context.strokeStyle = layer.color;
+        context.lineWidth = 1;
+        context.moveTo(layer.x - 2, layer.y);
+        context.lineTo(layer.x + 2, layer.y);
+        context.moveTo(layer.x, layer.y - 2);
+        context.lineTo(layer.x, layer.y + 2);
+        context.stroke();
+        break;
+
+      case "square":
+        context.globalAlpha = layer.alpha;
+        context.fillStyle = layer.color;
+        const size = 2 + Math.random() * 3;
+        context.fillRect(layer.x, layer.y, size, size);
+        break;
     }
-  </script>
+    context.restore();
+  });
+
+  // 第二步：最后绘制验证码文字（顶层！永远不会被遮挡）
+  textLayersRaw.forEach(layer => {
+    context.save();
+    context.globalAlpha = layer.alpha;
+    context.font = layer.bold
+      ? `bold ${layer.size}px 微软雅黑`
+      : `${layer.size}px 微软雅黑`;
+    context.fillStyle = layer.color;
+    context.translate(layer.x, layer.y);
+    context.rotate(layer.rotate);
+    context.fillText(layer.text, 0, 0);
+    context.restore();
+  });
+}
+
+// 时间格式化
+function formatNowTime() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  const ms = String(now.getMilliseconds()).padStart(3, '0');
+  return `${year}年${month}月${day}日 ${h}:${m}:${s}:${ms}`;
+}
+
+// 提交按钮逻辑
+button.onclick = function () {
+  var text = input.value.trim();
+  const currentTime = formatNowTime();
+  timeBox.textContent = currentTime;
+
+  // 调试输出：打开浏览器F12控制台，可以看到标准答案，方便测试！
+  console.log("正确验证码：", codeStr, "用户输入：", text);
+
+  if (text === codeStr) {
+    tipBox.textContent = "验证成功";
+    tipWrap.className = "tip-wrap success";
+    dialogOverlay.classList.add('show');
+  } else {
+    tipBox.textContent = "验证失败";
+    tipWrap.className = "tip-wrap error";
+  }
+  input.value = "";
+  draw();
+}
+
+// 悬浮交互
+canvas.addEventListener('mouseenter', ()=>{
+  clearAllHover();
+  canvas.classList.add('hover-active');
+  hoverTarget = 'canvas';
+})
+canvas.addEventListener('mouseleave', ()=>{
+  canvas.classList.remove('hover-active');
+  hoverTarget = null;
+})
+refreshBtns.forEach(btn=>{
+  btn.addEventListener('mouseenter', ()=>{
+    clearAllHover();
+    btn.classList.add('hover-active');
+    hoverTarget = 'refresh';
+  })
+  btn.addEventListener('mouseleave', ()=>{
+    btn.classList.remove('hover-active');
+    hoverTarget = null;
+  })
+})
+input.addEventListener('mouseenter', ()=>{
+  clearAllHover();
+  input.classList.add('hover-active');
+  hoverTarget = 'input';
+})
+input.addEventListener('mouseleave', ()=>{
+  input.classList.remove('hover-active');
+  hoverTarget = null;
+})
+button.addEventListener('mouseenter', ()=>{
+  clearAllHover();
+  button.classList.add('hover-active');
+  hoverTarget = 'submit';
+})
+button.addEventListener('mouseleave', ()=>{
+  button.classList.remove('hover-active');
+  hoverTarget = null;
+})
+
+function clearAllHover(){
+  codeWrap.classList.remove('hover-active','click-nohover');
+  canvas.classList.remove('hover-active','click-nohover');
+  input.classList.remove('hover-active','click-nohover');
+  button.classList.remove('hover-active','click-nohover');
+  refreshBtns.forEach(b=>b.classList.remove('hover-active','click-nohover'));
+}
+
+// 全局回车判定
+document.addEventListener('keydown', e=>{
+  if(e.key !== 'Enter') return;
+  e.preventDefault();
+  if(!hoverTarget) return;
+  switch(hoverTarget){
+    case 'canvas':
+    case 'refresh':
+      if(hoverTarget === 'canvas') canvas.classList.add('click-nohover');
+      else refreshBtns.forEach(b=>b.classList.add('click-nohover'));
+      refreshCode();
+      setTimeout(()=>{
+        canvas.classList.remove('click-nohover');
+        refreshBtns.forEach(b=>b.classList.remove('click-nohover'));
+      },300)
+      break;
+    case 'input':
+    case 'submit':
+      if(hoverTarget === 'input') input.classList.add('click-nohover');
+      else button.classList.add('click-nohover');
+      button.click();
+      setTimeout(()=>{
+        input.classList.remove('click-nohover');
+        button.classList.remove('click-nohover');
+      },300)
+      break;
+  }
+})
+
+// 初始化渲染
+draw();
+</script>
 </body>
 </html>
